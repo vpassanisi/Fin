@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "strict": true,
+    "module": "ES6",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    // "noUncheckedIndexedAccess": true,
+    "noFallthroughCasesInSwitch": false,
+    "baseUrl": "./src",
+    "types": ["svelte", "node"],
+  },
+}

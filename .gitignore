@@ -1,0 +1,7 @@
+.DS_Store
+dist/main.js
+dist/preload.js
+dist/renderer.js
+node_modules/
+thumbs.db
+.idea/
