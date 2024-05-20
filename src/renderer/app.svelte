@@ -1,10 +1,13 @@
 <script lang="ts">
     import "./index.css";
-    import { transactions } from './store'
+    import { categories, transactions } from './store'
     import History from './History.svelte'
     import Categories from './Categories.svelte'
     import { onMount } from "svelte";
-    
+    import { monthMap, saveTransactions } from "./utils";
+    import Breakdown from "./Breakdown.svelte";
+    import { transaction } from "./types";
+
     async function handleDrop(e: DragEvent) {
         e.preventDefault()
 
@@ -39,7 +42,15 @@
     })
 
     window.electron.onReadFromFile(res => {
-        if (res.success) transactions.set(res.data)
+        if (res.success) {
+            transactions.set(res.data)
+            categories.update((categories) => {
+                $transactions.forEach((val) => {
+                    if (val.category) categories.add(val.category)
+                })
+                return categories
+            })
+        }
         else console.log(res.message)
     })
 
@@ -55,7 +66,7 @@
         class="bg-green-500 h-32 w-32 rounded my-4"
         on:drop={handleDrop}
         on:dragover={(ev) => { ev.preventDefault() }} />
-    
+    <Breakdown />
     <Categories />
     <History />
   </div>

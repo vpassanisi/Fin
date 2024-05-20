@@ -1,5 +1,6 @@
 <script lang="ts">
-    import { months, monthFilter, filteredTransactions, categories } from './store'
+    import { months, monthFilter, filteredTransactions, categories, transactions } from './store'
+    import { saveTransactions } from './utils';
 </script>
   
   <div class="flex flex-col overflow-x-scroll">
@@ -27,10 +28,11 @@
           <div class="flex-grow-0 flex-shrink-0 basis-20 p-2">{transaction.amount}</div>
           <select
             class="bg-inherit outline-none p-2 flex-grow-0 flex-shrink-0 basis-28"
-            bind:value={transaction.category}>
+            bind:value={transaction.category}
+            on:change={() => saveTransactions($transactions)}>
             {#each $categories as category}
               <option value={category}>
-                {category.name}
+                {category}
               </option>
             {/each}
           </select>

@@ -1,23 +1,29 @@
 <script lang="ts">
-    import { categories } from './store'
+    import { categories, transactions } from './store'
+    import { saveTransactions } from './utils';
 
     let newCategory:string
 
     function add(name: string) {
-        categories.update((value) => {
-            value.push({name, transactions: []})
-            newCategory = ''
-            return value
+        categories.update(cat => {
+            cat.add(name)
+            return cat
         })
+        newCategory = ''
     }
 
     function remove(name: string) {
-        categories.update(value => {
-            const i = value.findIndex(val => val.name === name)
-            if (i === -1) return value
-            else value.splice(i, 1)
-            return value
+        categories.update(cat => {
+            cat.delete(name)
+            return cat
         })
+        transactions.update(trans => {
+            trans.forEach((cur, i, arr) => {
+                if (cur.category === name) arr[i]!.category = null
+            })
+            return trans
+        })
+        saveTransactions($transactions)
     }
 </script>
 
@@ -33,10 +39,10 @@
     </button>
     {#each $categories as category }
         <div class="flex">
-            <div class="mx-2">{category.name}</div>
+            <div class="mx-2">{category}</div>
             <button
                 class="bg-red-500 px-2 rounded"
-                on:click={() => remove(category.name)}>
+                on:click={() => remove(category)}>
                 X
             </button>
         </div>
