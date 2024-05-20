@@ -10,6 +10,10 @@ export interface month {
   value: string;
 }
 
+export interface transactionMapType {
+  [key: string]: transaction[];
+}
+
 export interface category {
   name: string;
   transactions: transaction[];

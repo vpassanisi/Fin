@@ -1,6 +1,6 @@
 <script lang="ts">
     import "./index.css";
-    import { categories, transactions } from './store'
+    import { categories, categoryMap, monthFilter, transactionsMap } from './store'
     import History from './History.svelte'
     import Categories from './Categories.svelte'
     import { onMount } from "svelte";
@@ -19,18 +19,36 @@
         if (data === undefined) return console.log('failed to read file')
         const dataArr = data.split('\n').filter(val => !!val)
 
-        const dataObjects = dataArr.map(str => {
-            const [date, amount, x, y, description] = str.split(',')
-            return {
+        const transMap = dataArr.reduce<Record<string, transaction[]>>((prev, cur) => {
+            const [date, amount, x, y, description] = cur.split(',')
+            if (!date || !amount || !description) {
+                console.error('failed to parse transaction')
+                return prev
+            }
+
+            const [month, day, year] = date.split("/");
+            if (!month || !year) {
+                console.error('failed to parse date')
+                return prev
+            }
+
+            const monthCode = `${monthMap[month]} ${year}`
+            const exists = prev[monthCode]
+            const transObj = {
                 date,
                 amount,
                 description,
                 category: null
             }
-        })
 
-        transactions.set(dataObjects)
-        window.electron.writeToDisk('./data.json', JSON.stringify(dataObjects));
+            if (!exists) prev[monthCode] = [transObj]
+            else exists.push(transObj)
+
+            return prev
+        } , {})
+
+        transactionsMap.set(transMap)
+        saveTransactions(transMap)
     }
 
     window.electron.onWriteResponse((res) => {
@@ -43,13 +61,16 @@
 
     window.electron.onReadFromFile(res => {
         if (res.success) {
-            transactions.set(res.data)
+            transactionsMap.set(res.data)
             categories.update((categories) => {
-                $transactions.forEach((val) => {
-                    if (val.category) categories.add(val.category)
-                })
+                for (const [key, value] of Object.entries($transactionsMap)) {
+                    value.forEach(val => {
+                        if (val.category) categories.add(val.category)
+                    })
+                }
                 return categories
             })
+            monthFilter.set(Object.keys($transactionsMap)[0]!)
         }
         else console.log(res.message)
     })
@@ -62,10 +83,12 @@
   
   <div class="p-8 h-full w-full bg-slate-900 text-white">
     <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div
         class="bg-green-500 h-32 w-32 rounded my-4"
         on:drop={handleDrop}
-        on:dragover={(ev) => { ev.preventDefault() }} />
+        on:dragover={(ev) => { ev.preventDefault() }}
+        on:click={() => console.log($categoryMap)} />
     <Breakdown />
     <Categories />
     <History />

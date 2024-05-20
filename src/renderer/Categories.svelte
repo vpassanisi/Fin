@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { categories, transactions } from './store'
+    import { categories, transactionsMap } from './store'
     import { saveTransactions } from './utils';
 
     let newCategory:string
@@ -17,13 +17,15 @@
             cat.delete(name)
             return cat
         })
-        transactions.update(trans => {
-            trans.forEach((cur, i, arr) => {
-                if (cur.category === name) arr[i]!.category = null
-            })
+        transactionsMap.update(trans => {
+            for (const [key, value] of Object.entries(trans)) {
+                value.forEach((cur, i, arr) => {
+                    if (cur.category === name) arr[i]!.category = null
+                })
+            }
             return trans
         })
-        saveTransactions($transactions)
+        saveTransactions($transactionsMap)
     }
 </script>
 

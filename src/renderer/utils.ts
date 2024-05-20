@@ -1,4 +1,4 @@
-import { transaction } from "./types";
+import { transaction, transactionMapType } from "./types";
 
 export const monthMap: Record<string, string> = {
   "01": "January",
@@ -15,6 +15,6 @@ export const monthMap: Record<string, string> = {
   "12": "December",
 };
 
-export function saveTransactions(trans: transaction[]) {
+export function saveTransactions(trans: transactionMapType) {
   window.electron.writeToDisk("./data.json", JSON.stringify(trans));
 }

@@ -1,41 +1,24 @@
 import { writable, derived } from "svelte/store";
 import { monthMap } from "./utils";
-import type { transaction, month, category } from "./types";
+import type { transaction, month, category, transactionMapType } from "./types";
 
-export const transactions = writable<transaction[]>([]);
+export const transactionsMap = writable<transactionMapType>({});
 
-export const months = derived(transactions, (val) =>
-  val.reduce<month[]>((prev, cur, i) => {
-    const [month, day, year] = cur.date.split("/");
-    const monthObj: month = {
-      name: `${monthMap[month]} ${year}`,
-      value: month,
-    };
-    if (!prev.find((x) => x.value === month)) prev.push(monthObj);
-    return prev;
-  }, [])
-);
+export const months = derived(transactionsMap, (val) => Object.keys(val));
 
-export const monthFilter = writable<month | null>(null);
-
-export const filteredTransactions = derived(
-  [transactions, months, monthFilter],
-  (val) => {
-    const [transactions, months, monthFilter] = val;
-    return transactions.filter((val) => {
-      const [month, day, year] = val.date.split("/");
-      if (!monthFilter || month === monthFilter.value) return val;
-    });
-  },
-  []
-);
+export const monthFilter = writable<string>("");
 
 export const categories = writable<Set<string>>(new Set());
 
 export const categoryMap = derived(
-  filteredTransactions,
+  [transactionsMap, monthFilter],
   (val) => {
-    return val.reduce<category[]>((prev, cur) => {
+    const [transMap, selectedMonth] = val;
+
+    const currentMonth = transMap[selectedMonth];
+    if (!currentMonth) return [];
+
+    return currentMonth.reduce<category[]>((prev, cur) => {
       const { category } = cur;
       if (!category) return prev;
 
