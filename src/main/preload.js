@@ -1,8 +1,12 @@
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer } = require("electron");
 
-contextBridge.exposeInMainWorld('electron', {
-  writeToDisk: (filePath, content) => ipcRenderer.send('write-to-file', { filePath, content }),
-  readFromDisk: (filePath) => ipcRenderer.send('read-from-disk', filePath),
-  onWriteResponse: (callback) => ipcRenderer.on('write-to-file-res', (event, res) => callback(res)),
-  onReadFromFile: (callback) => ipcRenderer.on('read-from-disk-res', (event, res) => callback(res))
+contextBridge.exposeInMainWorld("electron", {
+  store: {
+    get(key) {
+      return ipcRenderer.sendSync("electron-store-get", key);
+    },
+    set(property, val) {
+      ipcRenderer.send("electron-store-set", property, val);
+    },
+  },
 });

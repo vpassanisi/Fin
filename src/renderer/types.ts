@@ -1,4 +1,5 @@
 export interface transaction {
+  id: string;
   amount: string;
   date: string;
   description: string;
@@ -10,24 +11,23 @@ export interface month {
   value: string;
 }
 
-export interface transactionMapType {
-  [key: string]: transaction[];
-}
-
 export interface category {
   name: string;
   transactions: transaction[];
 }
 
+export interface policy {
+  matches: string;
+  result: string;
+}
+
 declare global {
   interface Window {
     electron: {
-      writeToDisk: (filepath: string, content: string) => void;
-      readFromDisk: (filePath: string) => void;
-      onWriteResponse: (callback: (res: { success: boolean; message: string }) => void) => void;
-      onReadFromFile: (
-        callback: (res: { success: boolean; message: string; data: any }) => void
-      ) => void;
+      store: {
+        get: (key: string) => any;
+        set: (key: string, val: any) => void;
+      };
     };
   }
 }

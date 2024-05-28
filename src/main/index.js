@@ -1,9 +1,15 @@
-"use strict";
+import { app, BrowserWindow, ipcMain } from "electron";
+import path from "node:path";
+import Reload from "./reload.js";
+import Store from "electron-store";
+import { fileURLToPath } from "node:url";
 
-const { app, BrowserWindow, ipcMain } = require("electron");
-const path = require("path");
-const fs = require('fs');
-require("electron-reload")(path.join(__dirname));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+Reload(__dirname);
+
+const store = new Store();
 
 process.env["ELECTRON_DISABLE_SECURITY_WARNINGS"] = "true";
 
@@ -15,8 +21,8 @@ function createWindow() {
     width: 1280,
     resizable: false,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-  }
+      preload: path.join(__dirname, "preload.cjs"),
+    },
   });
 
   win.setMenuBarVisibility(false);
@@ -43,25 +49,10 @@ app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
 });
 
-// IPC listener to handle file write
-ipcMain.on('write-to-file', (event, arg) => {
-  const { filePath, content } = arg;
-
-  fs.writeFile(filePath, content, (err) => {
-    if (err) {
-      event.reply('write-to-file-res', { success: false, message: err.message });
-    } else {
-      event.reply('write-to-file-res', { success: true, message: 'File written successfully!' });
-    }
-  });
+// IPC listener
+ipcMain.on("electron-store-get", async (event, val) => {
+  event.returnValue = store.get(val);
 });
-
-ipcMain.on('read-from-disk', (event, arg) => {
-  try {
-    const data = fs.readFileSync(arg, 'utf8');
-    const jsonData = JSON.parse(data);
-    event.reply('read-from-disk-res', { success: true, message: 'File read successfully', data: jsonData })
-  } catch (err) {
-    event.reply('read-from-disk-res', { success: false, message: err})
-  }
-})
+ipcMain.on("electron-store-set", async (event, key, val) => {
+  store.set(key, val);
+});

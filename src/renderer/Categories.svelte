@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { categories, transactionsMap } from './store'
-    import { saveTransactions } from './utils';
+    import { categories, transactions } from './store.js'
+    import Input from 'renderer/components/Input.svelte'
 
     let newCategory:string
 
@@ -17,23 +17,17 @@
             cat.delete(name)
             return cat
         })
-        transactionsMap.update(trans => {
-            for (const [key, value] of Object.entries(trans)) {
-                value.forEach((cur, i, arr) => {
-                    if (cur.category === name) arr[i]!.category = null
-                })
-            }
+        transactions.update(trans => {
+            trans.forEach((cur, i , arr) => {
+                if (cur.category === name) arr[i]!.category = null
+            })
             return trans
         })
-        saveTransactions($transactionsMap)
     }
 </script>
 
 <div class="py-4">
-    <input
-        class="bg-zinc-800 rounded border-solid border-zinc-700 border-2 outline-none px-2"
-        type="text"
-        bind:value={newCategory}>
+    <Input bind:value={newCategory} />
     <button
         class="bg-green-500 px-2 rounded"
         on:click={() => add(newCategory)}>
