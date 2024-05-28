@@ -2,12 +2,16 @@
   "compilerOptions": {
     "target": "ES6",
     "strict": true,
-    "module": "ES6",
-    "moduleResolution": "node",
+    "module": "node16",
+    "moduleResolution": "node16",
     "allowSyntheticDefaultImports": true,
     "noUncheckedIndexedAccess": true,
     "noFallthroughCasesInSwitch": false,
     "baseUrl": "./src",
-    "types": ["svelte", "node"]
+    "types": ["svelte", "node"],
+    "lib": ["es2021", "dom"],
+    "paths": {
+      "@renderer": ["renderer/*"]
+    }
   }
 }
